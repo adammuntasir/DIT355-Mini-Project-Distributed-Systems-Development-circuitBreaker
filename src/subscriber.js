@@ -15,8 +15,19 @@ var subscriber = {
 
     stopAndReconnect: function() {
 
-        client.reconnect()
+        client.unsubscribe(access.FromClient)
+        console.log("We unsubscribed")
 
+        sleepFor(10000)
+
+        client.subscribe(access.FromClient)
+        console.log("We subscribed again")
+
+
+        function sleepFor(sleepDuration) {
+            var now = new Date().getTime();
+            while (new Date().getTime() < now + sleepDuration) { /* Do nothing */ }
+        }
     },
     start: function() {
         //Called when client is connected
