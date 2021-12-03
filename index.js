@@ -29,7 +29,7 @@ subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
 
         bufferClass.pushInside(bytesString) // the buffer array will insert inside it the payload after being converted to a string
     } catch (error) {
-        subscriber.stopAndReconnect()
+        console.log(error)
     }
     // every second from request generator is 1 message we should wait 10 seconds to fill up the buffer with 10 messages 
     // if we get in 10 seconds 11 messages that means the circuit breaker 
