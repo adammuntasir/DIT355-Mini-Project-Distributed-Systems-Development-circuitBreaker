@@ -16,15 +16,9 @@ class BufferArrayLogic {
             this.elementsInside.push(elements)
 
         }
-        if (this.elementsInside.length == this.maximumLength) {
-            this.openCircuitBreaker() // add logic to make the subscription wait 5 seconds before subscribing again
-                // make the array empty again before pushing again 
-            this.elementsInside = []
-            this.elementsInside.push(elements)
 
-
-        }
     }
+
 
     displayFirstElement() {
         return this.elementsInside.shift();

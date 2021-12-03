@@ -9,6 +9,7 @@ options = access.options;
 var client = mqtt.connect("tcp://" + ip + ":" + port, options);
 
 var publisher = {
+
     start: function() {
         //Called when client is connected
         client.on("connect", function() {
