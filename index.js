@@ -22,43 +22,28 @@ var bufferClass = new logic(5) // number of data from request generator before t
 var dataReceived
 subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
 
-    if (payload.length > 40) {
-        var messageExtracted = logic.extractData(payload)
-            //console.log(payload)
-        var dataResult = bookingFunction.callFunction(messageExtracted)
-        if (dataResult === true) {
-            var bytesString = String.fromCharCode(...payload) // https://programmingwithswift.com/how-to-convert-byte-array-to-string-with-javascript/ EQUAL TO STRING
 
-            var modifyTime = JSON.parse(bytesString)
-            var readyToBeModified = modifyTime.date
-            var splitUpString = readyToBeModified.split(/(?::|-| )+/);
-            console.log(splitUpString)
+    try {
+        console.log(payload.length)
+        var bytesString = String.fromCharCode(...payload) // https://programmingwithswift.com/how-to-convert-byte-array-to-string-with-javascript/ EQUAL TO STRING
 
-            publisher.publish(payload)
-        }
-
-    } else {
-        try {
-            console.log(payload.length)
-            var bytesString = String.fromCharCode(...payload) // https://programmingwithswift.com/how-to-convert-byte-array-to-string-with-javascript/ EQUAL TO STRING
-
-            bufferClass.pushInside(bytesString) // the buffer array will insert inside it the payload after being converted to a string
-        } catch (error) {
-            subscriber.stopAndReconnect()
-        }
-        // every second from request generator is 1 message we should wait 10 seconds to fill up the buffer with 10 messages 
-        // if we get in 10 seconds 11 messages that means the circuit breaker 
-        var time = 1000
-        if (bufferClass.elementsInside.length > 0) {
-            time += 100000;
-        }
-        setInterval(function() { // we have the call back function so that we empty up the bufferClass as it gets filled up
-                // without the callback function the buffer will be emptied every time we use the function displayFirstElement
-                var bytesString = String.fromCharCode(...payload)
-                dataReceived = bufferClass.displayFirstElement(bytesString)
-                publisher.publish(dataReceived)
-
-            }, time) // we are giving the buffer 11 second as a chance for it to start filling up, once we get a value we it adds up the time, if we reach the time the buffer will reset to zero (it will reach the time if no one subscribes for a long period of time) 
-
+        bufferClass.pushInside(bytesString) // the buffer array will insert inside it the payload after being converted to a string
+    } catch (error) {
+        subscriber.stopAndReconnect()
     }
+    // every second from request generator is 1 message we should wait 10 seconds to fill up the buffer with 10 messages 
+    // if we get in 10 seconds 11 messages that means the circuit breaker 
+    var time = 1000
+    if (bufferClass.elementsInside.length > 0) {
+        time += 100000;
+    }
+    setInterval(function() { // we have the call back function so that we empty up the bufferClass as it gets filled up
+            // without the callback function the buffer will be emptied every time we use the function displayFirstElement
+            var bytesString = String.fromCharCode(...payload)
+            dataReceived = bufferClass.displayFirstElement(bytesString)
+            publisher.publish(dataReceived)
+
+        }, time) // we are giving the buffer 11 second as a chance for it to start filling up, once we get a value we it adds up the time, if we reach the time the buffer will reset to zero (it will reach the time if no one subscribes for a long period of time) 
+
+
 })
