@@ -18,19 +18,30 @@ const { Client } = require('mqtt');
 
 subscriber.start(); //starts the subscriber.js module
 publisher.start(); //starts the publisher.js module
-var bufferClass = new logic(5) // number of data from request generator before threshold hits
+var maximumThreshold = 5
+var bufferClass = new logic(maximumThreshold) // number of data from request generator before threshold hits
 var dataReceived
+var outside = new Array()
+
 subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
 
-
+    console.log(outside.length)
+    outside.push(payload)
     try {
-        console.log(payload.length)
+
         var bytesString = String.fromCharCode(...payload) // https://programmingwithswift.com/how-to-convert-byte-array-to-string-with-javascript/ EQUAL TO STRING
 
+
         bufferClass.pushInside(bytesString) // the buffer array will insert inside it the payload after being converted to a string
+
+
     } catch (error) {
         console.log(error)
     }
+
+
+
+
     // every second from request generator is 1 message we should wait 10 seconds to fill up the buffer with 10 messages 
     // if we get in 10 seconds 11 messages that means the circuit breaker 
     var time = 1000
@@ -40,6 +51,7 @@ subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
     setInterval(function() { // we have the call back function so that we empty up the bufferClass as it gets filled up
             // without the callback function the buffer will be emptied every time we use the function displayFirstElement
             var bytesString = String.fromCharCode(...payload)
+
             dataReceived = bufferClass.displayFirstElement(bytesString)
             publisher.publish(dataReceived)
 

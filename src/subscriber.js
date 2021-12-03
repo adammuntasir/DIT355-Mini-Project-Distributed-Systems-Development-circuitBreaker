@@ -1,7 +1,7 @@
 //Setup of subscriber
 //Setup of subscriber
 var mqtt = require("mqtt");
-var options = { qos: 1, keepalive: 100, reconnectPeriod: 10000 };
+var options = { qos: 1, keepalive: 100, reconnectPeriod: 1000000 };
 var access = require("../../global_values");
 ip = access.ip_address;
 tcp_port = access.tcp_port;
@@ -15,14 +15,15 @@ var subscriber = {
 
     stopAndReconnect: function() {
 
-        client.unsubscribe(access.FromClient)
+        client.reconnect()
         console.log("We unsubscribed")
 
-        sleepFor(10000)
+        sleepFor(1000)
 
-        client.subscribe(access.FromClient)
+        /*
+        client.subscribe()
         console.log("We subscribed again")
-
+*/
 
         function sleepFor(sleepDuration) {
             var now = new Date().getTime();
