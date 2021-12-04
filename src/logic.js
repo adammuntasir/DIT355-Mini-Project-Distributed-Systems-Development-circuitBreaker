@@ -1,4 +1,5 @@
-var subscriber = require('./subscriber.js');
+const publisher = require('./publisher.js');
+const access = require('../../global_values')
 
 
 class BufferArrayLogic {
@@ -26,6 +27,7 @@ class BufferArrayLogic {
 
 
     displayFirstElement() {
+
         return this.elementsInside.shift();
     }
 
@@ -33,9 +35,8 @@ class BufferArrayLogic {
 
         console.log("The circuit breaker is now open") // send message to visualizer, and the website will deactivate the button of subscribe for 5 seconds, or the request generator should keep going but we stop receiving from it 
             // we have to stop recieving from 
-        subscriber.stopAndReconnect()
-            // subscriber should stop receiving messages ( maybe invoke disconnected)
-            // subscriber should start again after 3 seconds ( invoke reconnecting )
+        var ToSend = JSON.stringify({ c: "c" })
+        publisher.publish(ToSend)
 
     }
 }
