@@ -17,13 +17,13 @@ const logic = require('./src/logic.js');
 
 subscriber.start(); //starts the subscriber.js module
 publisher.start(); //starts the publisher.js module
-var maximumThreshold = 20
+var maximumThreshold = 50
 var bufferClass = new logic(maximumThreshold) // number of data from request generator before threshold hits
 var dataReceived
 var outside = new Array()
-
 subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
 
+    outside.push(payload)
 
     try {
 
@@ -35,17 +35,25 @@ subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
     }
 
 
-    var time = 10000 // having less than a second will give instant results (we can make the generator send in less than 1 second 4 messages)
-    if (bufferClass.elementsInside.length > 0) {
-        time += 1000;
+    var time = 1000 // having less than a second will give instant results (we can make the generator send in less than 1 second 4 messages)
+
+    console.log("The amount of elements inside")
+    console.log(outside.length)
+    if (bufferClass.elementsInside.length >= 0) {
+
+        setInterval(function() {
+
+
+            var bytesString2 = String.fromCharCode(...payload)
+            dataReceived = bufferClass.displayFirstElement(bytesString2)
+            publisher.publish(dataReceived)
+
+            if (outside.length % 10 == 0) {
+                bufferClass.openCircuitBreaker()
+            }
+        }, time)
     }
-    setInterval(function() {
-        var bytesString2 = String.fromCharCode(...payload)
 
-        dataReceived = bufferClass.displayFirstElement(bytesString2)
-        publisher.publish(dataReceived)
-
-    }, time)
 
 
 })
