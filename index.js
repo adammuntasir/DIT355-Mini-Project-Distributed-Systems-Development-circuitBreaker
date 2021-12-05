@@ -15,9 +15,9 @@ var subscriber = require('./src/subscriber.js');
 var publisher = require('./src/publisher.js');
 const logic = require('./src/logic.js');
 
-subscriber.stopAndReconnect(); //starts the subscriber.js module
+subscriber.start(); //starts the subscriber.js module
 publisher.start(); //starts the publisher.js module
-var maximumThreshold = 5
+var maximumThreshold = 20
 var bufferClass = new logic(maximumThreshold) // number of data from request generator before threshold hits
 var dataReceived
 var outside = new Array()
@@ -35,7 +35,7 @@ subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
     }
 
 
-    var time = 1000 // having less than a second will give instant results (we can make the generator send in less than 1 second 4 messages)
+    var time = 10000 // having less than a second will give instant results (we can make the generator send in less than 1 second 4 messages)
     if (bufferClass.elementsInside.length > 0) {
         time += 1000;
     }
