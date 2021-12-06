@@ -48,8 +48,8 @@ var subscriber = {
 };
 
 function startSubscription() {
+    //client.subscribe(access.sendToCircuitBreaker); // receive the chosen date
     client.subscribe(access.sendToCircuitBreaker); // receive the chosen date
-    client.subscribe(access.FromClient); // receive the chosen date
 
 }
 

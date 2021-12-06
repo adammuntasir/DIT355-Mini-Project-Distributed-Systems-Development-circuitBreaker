@@ -22,43 +22,30 @@ var maximumThreshold = 20
 var bufferClass = new logic(maximumThreshold) // number of data from request generator before threshold hits
 var outside = new Array()
 
-subscriber.eventListener.on("mqttRecieved", function(payload) {
-
-    try {
-        var bytesString = String.fromCharCode(...payload)
-        bufferClass.pushInside(bytesString) // it will push until 20 messages are recieved 
-        var dataReceived = bufferClass.displayFirstElement(bytesString) // we get the first element and remove
-        publisher.publish(dataReceived) // we publish the first element 
-    } catch (error) {
-        console.log(error)
-    }
-
-
-    /*
-        var startTime = performance.now()
-        if (outside.length < 20) {
-            outside.push(payload)
-        }
-        var endTime = performance.now()
-
-        console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
-    // evry 5 seconds the performance is 0.014 milliseconds 
-    // every .5 seconds the performance is 0.002 millisoconds 
-    */
-
+subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
+    var bytesString = String.fromCharCode(...payload)
 
     // we can say if the time to fill the array is less than 0.01 then the circuit breaker opens 
-
-    var startTime = performance.now()
-    if (outside.length < 20) {
-        outside.push(payload)
+    var startTime = performance.now() // start measuring the speed
+    outside.push(bytesString)
+    console.log(outside.length)
+    if (outside.length == maximumThreshold) {
+        var endTime = performance.now()
+        outside = [] // reset the array when full 
+        if ((endTime - startTime) < 0.4) { // find the speed, because if we reach the threshold 
+            console.log((endTime - startTime))
+            console.log("Circuit Breaker Open")
+            bufferClass.openCircuitBreaker()
+        } else {
+            console.log((endTime - startTime))
+            console.log("Circuit Breaker does not need to open")
+        }
+    } else {
+        bufferClass.pushInside(bytesString)
+        var dataReceived = bufferClass.displayFirstElement(bytesString) // we get the first element and remove
+        publisher.publish(dataReceived) // we publish the first element 
     }
-    var endTime = performance.now()
 
-    if ((endTime - startTime) < 0.01) {
-        bufferClass.openCircuitBreaker()
-    }
 
-    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
 
 })
