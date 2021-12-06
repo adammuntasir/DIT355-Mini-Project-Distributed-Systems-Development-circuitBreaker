@@ -10,6 +10,7 @@
 // circuit is an array that will pass data for publishing if its turned off
 // if the circuit breaker is on, we dont publish to the next component, // we see in the console that its turned on 
 
+const { performance } = require('perf_hooks');
 
 var subscriber = require('./src/subscriber.js');
 var publisher = require('./src/publisher.js');
@@ -19,33 +20,45 @@ subscriber.start(); //starts the subscriber.js module
 publisher.start(); //starts the publisher.js module
 var maximumThreshold = 20
 var bufferClass = new logic(maximumThreshold) // number of data from request generator before threshold hits
-var dataReceived
 var outside = new Array()
 
-subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
-
+subscriber.eventListener.on("mqttRecieved", function(payload) {
 
     try {
-
         var bytesString = String.fromCharCode(...payload)
-        bufferClass.pushInside(bytesString) // the buffer array will insert inside it the payload after being converted to a string
-
+        bufferClass.pushInside(bytesString) // it will push until 20 messages are recieved 
+        var dataReceived = bufferClass.displayFirstElement(bytesString) // we get the first element and remove
+        publisher.publish(dataReceived) // we publish the first element 
     } catch (error) {
         console.log(error)
     }
 
 
-    var time = 10000 // having less than a second will give instant results (we can make the generator send in less than 1 second 4 messages)
-    if (bufferClass.elementsInside.length > 0) {
-        time += 1000;
+    /*
+        var startTime = performance.now()
+        if (outside.length < 20) {
+            outside.push(payload)
+        }
+        var endTime = performance.now()
+
+        console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+    // evry 5 seconds the performance is 0.014 milliseconds 
+    // every .5 seconds the performance is 0.002 millisoconds 
+    */
+
+
+    // we can say if the time to fill the array is less than 0.01 then the circuit breaker opens 
+
+    var startTime = performance.now()
+    if (outside.length < 20) {
+        outside.push(payload)
     }
-    setInterval(function() {
-        var bytesString2 = String.fromCharCode(...payload)
+    var endTime = performance.now()
 
-        dataReceived = bufferClass.displayFirstElement(bytesString2)
-        publisher.publish(dataReceived)
+    if ((endTime - startTime) < 0.01) {
+        bufferClass.openCircuitBreaker()
+    }
 
-    }, time)
-
+    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
 
 })
