@@ -32,7 +32,7 @@ subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
     if (outside.length == maximumThreshold) {
         var endTime = performance.now()
         outside = [] // reset the array when full 
-        if ((endTime - startTime) < 0.4) { // find the speed, because if we reach the threshold 
+        if ((endTime - startTime) < 3.4) { // find the speed, because if we reach the threshold 
             console.log((endTime - startTime))
             console.log("Circuit Breaker Open")
             bufferClass.openCircuitBreaker()
