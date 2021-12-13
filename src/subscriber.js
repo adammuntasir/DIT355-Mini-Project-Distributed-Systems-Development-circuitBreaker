@@ -3,7 +3,7 @@
 //Setup of subscriber
 //Setup of subscriber
 var mqtt = require("mqtt");
-var options = { qos: 1, keepalive: 0, reconnectPeriod: 5000 };
+var options = { qos: 1, keepalive: 1000, reconnectPeriod: 5000 };
 var access = require("../../global_values");
 ip = access.ip_address;
 tcp_port = access.tcp_port;
