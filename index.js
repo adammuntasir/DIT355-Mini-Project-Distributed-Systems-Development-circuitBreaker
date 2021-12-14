@@ -50,10 +50,10 @@ subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
             console.log((endTime - originalStartTime))
             console.log("Circuit Breaker Open")
             bufferClass.openCircuitBreaker()
-
+            startArray = []
         } else {
             console.log("Circuit Breaker does not need to open")
-
+            startArray = []
         }
     } else {
         bufferClass.pushInside(bytesString)
