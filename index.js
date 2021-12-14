@@ -21,7 +21,8 @@ publisher.start(); //starts the publisher.js module
 var maximumThreshold = 20
 var bufferClass = new logic(maximumThreshold) // number of data from request generator before threshold hits
 var outside = new Array()
-
+var final
+var total
 subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
     var bytesString = String.fromCharCode(...payload)
 
@@ -31,8 +32,9 @@ subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
     console.log(outside.length)
     if (outside.length == maximumThreshold) {
         var endTime = performance.now()
+        console.log(endTime)
         outside = [] // reset the array when full 
-        if ((endTime - startTime) < 3.4) { // find the speed, because if we reach the threshold 
+        if ((endTime - startTime) > 0.2) { // find the speed, because if we reach the threshold 
             console.log((endTime - startTime))
             console.log("Circuit Breaker Open")
             bufferClass.openCircuitBreaker()
