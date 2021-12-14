@@ -23,24 +23,38 @@ var bufferClass = new logic(maximumThreshold) // number of data from request gen
 var outside = new Array()
 var final
 var total
+var startArray = new Array()
 subscriber.eventListener.on("mqttRecieved", function(topic, payload) {
     var bytesString = String.fromCharCode(...payload)
+    var startTime
+        // we can say if the time to fill the array is less than 0.01 then the circuit breaker opens 
+    if (outside.length >= 0) {
+        startTime = performance.now() // start measuring the speed
+        console.log("startTime")
+        console.log(startTime)
+        startArray.push(startTime)
 
-    // we can say if the time to fill the array is less than 0.01 then the circuit breaker opens 
-    var startTime = performance.now() // start measuring the speed
+    }
+    var originalStartTime = (startArray[0])
+
     outside.push(bytesString)
     console.log(outside.length)
     if (outside.length == maximumThreshold) {
+
         var endTime = performance.now()
-        console.log(endTime)
+        console.log(endTime - originalStartTime)
+        console.log("endTime")
+        console.log((endTime))
         outside = [] // reset the array when full 
-        if ((endTime - startTime) > 0.2) { // find the speed, because if we reach the threshold 
-            console.log((endTime - startTime))
+        if ((endTime - startArray[0]) < 3.5) { // find the speed, because if we reach the threshold 
+            console.log((endTime - originalStartTime))
             console.log("Circuit Breaker Open")
             bufferClass.openCircuitBreaker()
+
         } else {
             console.log((endTime - startTime))
             console.log("Circuit Breaker does not need to open")
+
         }
     } else {
         bufferClass.pushInside(bytesString)
